@@ -1,7 +1,8 @@
 package ru.javaops.masterjava.matrix;
 
-import org.la4j.Matrix;
-import org.la4j.matrix.dense.Basic2DMatrix;
+import cern.colt.matrix.DoubleFactory2D;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -29,10 +30,10 @@ public class MainMatrix {
         while (count < 6) {
             System.out.println("Pass " + count);
             long start = System.currentTimeMillis();
-//            final int[][] matrixC = MatrixUtil.singleThreadMultiply(matrixA, matrixB);
-            Matrix simpMatrixA = new Basic2DMatrix(matrixA);
-            Matrix simpMatrixB = new Basic2DMatrix(matrixB);
-            Matrix matrixC = simpMatrixA.multiply(simpMatrixB);
+            DoubleMatrix2D simpMatrixA = DoubleFactory2D.dense.make(matrixA);
+            DoubleMatrix2D simpMatrixB = DoubleFactory2D.dense.make(matrixB);
+            Algebra algebra = new Algebra();
+            DoubleMatrix2D matrixC = algebra.mult(simpMatrixA, simpMatrixB);
 
             double duration = (System.currentTimeMillis() - start) / 1000.;
             out("Single thread time, sec: %.3f", duration);
