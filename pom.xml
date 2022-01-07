@@ -34,14 +34,12 @@
     </build>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.ejml/ejml-all -->
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
+        <!-- https://mvnrepository.com/artifact/org.la4j/la4j -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-math3</artifactId>
-            <version>3.6.1</version>
+            <groupId>org.la4j</groupId>
+            <artifactId>la4j</artifactId>
+            <version>0.6.0</version>
         </dependency>
-
     </dependencies>
 
     <profiles>

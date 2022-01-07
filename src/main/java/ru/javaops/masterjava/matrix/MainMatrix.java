@@ -1,7 +1,7 @@
 package ru.javaops.masterjava.matrix;
 
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
-import org.apache.commons.math3.linear.RealMatrix;
+import org.la4j.Matrix;
+import org.la4j.matrix.dense.Basic2DMatrix;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -30,9 +30,9 @@ public class MainMatrix {
             System.out.println("Pass " + count);
             long start = System.currentTimeMillis();
 //            final int[][] matrixC = MatrixUtil.singleThreadMultiply(matrixA, matrixB);
-            RealMatrix simpMatrixA = new Array2DRowRealMatrix(matrixA);
-            RealMatrix simpMatrixB = new Array2DRowRealMatrix(matrixB);
-            RealMatrix matrixC = simpMatrixA.multiply(simpMatrixB);
+            Matrix simpMatrixA = new Basic2DMatrix(matrixA);
+            Matrix simpMatrixB = new Basic2DMatrix(matrixB);
+            Matrix matrixC = simpMatrixA.multiply(simpMatrixB);
 
             double duration = (System.currentTimeMillis() - start) / 1000.;
             out("Single thread time, sec: %.3f", duration);
