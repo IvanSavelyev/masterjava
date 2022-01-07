@@ -1,5 +1,7 @@
 package ru.javaops.masterjava.matrix;
 
+import org.ejml.simple.SimpleMatrix;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,8 +17,10 @@ public class MainMatrix {
     private final static ExecutorService executor = Executors.newFixedThreadPool(MainMatrix.THREAD_NUMBER);
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        final int[][] matrixA = MatrixUtil.create(MATRIX_SIZE);
-        final int[][] matrixB = MatrixUtil.create(MATRIX_SIZE);
+//        final int[][] matrixA = MatrixUtil.create(MATRIX_SIZE);
+//        final int[][] matrixB = MatrixUtil.create(MATRIX_SIZE);
+        final double[][] matrixA = MatrixUtil.create(MATRIX_SIZE);
+        final double[][] matrixB = MatrixUtil.create(MATRIX_SIZE);
 
         double singleThreadSum = 0.;
         double concurrentThreadSum = 0.;
@@ -24,18 +28,23 @@ public class MainMatrix {
         while (count < 6) {
             System.out.println("Pass " + count);
             long start = System.currentTimeMillis();
-            final int[][] matrixC = MatrixUtil.singleThreadMultiply(matrixA, matrixB);
+//            final int[][] matrixC = MatrixUtil.singleThreadMultiply(matrixA, matrixB);
+            SimpleMatrix simpMatrixA = new SimpleMatrix(matrixA);
+            SimpleMatrix simpMatrixB = new SimpleMatrix(matrixB);
+            SimpleMatrix matrixC = simpMatrixA.mult(simpMatrixB);
+
             double duration = (System.currentTimeMillis() - start) / 1000.;
             out("Single thread time, sec: %.3f", duration);
             singleThreadSum += duration;
 
             start = System.currentTimeMillis();
-            final int[][] concurrentMatrixC = MatrixUtil.concurrentMultiply(matrixA, matrixB, executor);
+            final double[][] concurrentMatrixC = MatrixUtil.concurrentMultiply(matrixA, matrixB, executor);
             duration = (System.currentTimeMillis() - start) / 1000.;
             out("Concurrent thread time, sec: %.3f", duration);
             concurrentThreadSum += duration;
 
-            if (!MatrixUtil.compare(matrixC, concurrentMatrixC)) {
+//            if (!MatrixUtil.compare(matrixC, concurrentMatrixC)) {
+            if (true) {
                 System.err.println("Comparison failed");
                 break;
             }

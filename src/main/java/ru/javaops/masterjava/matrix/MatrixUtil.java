@@ -11,9 +11,9 @@ import java.util.concurrent.ExecutorService;
 public class MatrixUtil {
 
     // TODO implement parallel multiplication matrixA*matrixB
-    public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
+    public static double[][] concurrentMultiply(double[][] matrixA, double[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
         final int matrixSize = matrixA.length;
-        final int[][] matrixC = new int[matrixSize][matrixSize];
+        final double[][] matrixC = new double[matrixSize][matrixSize];
 
         return matrixC;
     }
@@ -23,20 +23,30 @@ public class MatrixUtil {
         final int matrixSize = matrixA.length;
         final int[][] matrixC = new int[matrixSize][matrixSize];
 
-        for (int i = 0; i < matrixSize; i++) {
-            for (int j = 0; j < matrixSize; j++) {
-                int sum = 0;
+        int[] thatColumn = new int[matrixSize];
+
+        try {
+            for (int j = 0; ; j++) {
                 for (int k = 0; k < matrixSize; k++) {
-                    sum += matrixA[i][k] * matrixB[k][j];
+                    thatColumn[k] = matrixB[k][j];
                 }
-                matrixC[i][j] = sum;
+
+                for (int i = 0; i < matrixSize; i++) {
+                    int[] thisRow = matrixA[i];
+                    int sum = 0;
+                    for (int k = 0; k < matrixSize; k++) {
+                        sum += thisRow[k] * thatColumn[k];
+                    }
+                    matrixC[i][j] = sum;
+                }
             }
-        }
+        } catch (IndexOutOfBoundsException ignored) { }
+
         return matrixC;
     }
 
-    public static int[][] create(int size) {
-        int[][] matrix = new int[size][size];
+    public static double[][] create(int size) {
+        double[][] matrix = new double[size][size];
         Random rn = new Random();
 
         for (int i = 0; i < size; i++) {
