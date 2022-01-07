@@ -1,6 +1,7 @@
 package ru.javaops.masterjava.matrix;
 
-import org.ejml.simple.SimpleMatrix;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -29,10 +30,9 @@ public class MainMatrix {
             System.out.println("Pass " + count);
             long start = System.currentTimeMillis();
 //            final int[][] matrixC = MatrixUtil.singleThreadMultiply(matrixA, matrixB);
-            SimpleMatrix simpMatrixA = new SimpleMatrix(matrixA);
-            SimpleMatrix simpMatrixB = new SimpleMatrix(matrixB);
-            SimpleMatrix matrixC = simpMatrixA.mult(simpMatrixB);
-
+            INDArray nd4jMatrixA = Nd4j.create(matrixA);
+            INDArray nd4jMatrixB = Nd4j.create(matrixB);
+            INDArray actual = nd4jMatrixA.mmul(nd4jMatrixB);
             double duration = (System.currentTimeMillis() - start) / 1000.;
             out("Single thread time, sec: %.3f", duration);
             singleThreadSum += duration;
