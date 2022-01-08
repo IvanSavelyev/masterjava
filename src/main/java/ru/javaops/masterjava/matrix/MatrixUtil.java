@@ -1,8 +1,10 @@
 package ru.javaops.masterjava.matrix;
 
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /**
  * gkislin
@@ -11,9 +13,26 @@ import java.util.concurrent.ExecutorService;
 public class MatrixUtil {
 
     // TODO implement parallel multiplication matrixA*matrixB
-    public static double[][] concurrentMultiply(double[][] matrixA, double[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
+    public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
         final int matrixSize = matrixA.length;
-        final double[][] matrixC = new double[matrixSize][matrixSize];
+        final int[][] matrixC = new int[matrixSize][matrixSize];
+        LinkedList<Future> taskFutures = new LinkedList<>();
+        for (int rowResult = 0; rowResult < matrixSize; rowResult++) {
+            final int finalRowResult = rowResult;
+            for (int columnResult = 0; columnResult < matrixSize; columnResult++) {
+                final int finalColumnResult = columnResult;
+                matrixC[finalRowResult][finalColumnResult] = 0;
+                taskFutures.add(executor.submit(() -> {
+                    for (int i = 0; i < matrixSize; i++) {
+                        matrixC[finalRowResult][finalColumnResult] +=
+                                matrixA[finalRowResult][i] * matrixB[i][finalColumnResult];
+                    }
+                }));
+            }
+        }
+        for (Future taskFuture : taskFutures) {
+            taskFuture.get();
+        }
 
         return matrixC;
     }
@@ -45,8 +64,8 @@ public class MatrixUtil {
         return matrixC;
     }
 
-    public static double[][] create(int size) {
-        double[][] matrix = new double[size][size];
+    public static int[][] create(int size) {
+        int[][] matrix = new int[size][size];
         Random rn = new Random();
 
         for (int i = 0; i < size; i++) {
