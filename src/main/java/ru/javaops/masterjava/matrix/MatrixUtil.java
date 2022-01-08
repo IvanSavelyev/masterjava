@@ -15,25 +15,28 @@ public class MatrixUtil {
     // TODO implement parallel multiplication matrixA*matrixB
     public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, ExecutorService executor) throws InterruptedException, ExecutionException {
         final int matrixSize = matrixA.length;
-        final int[][] matrixC = new int[matrixSize][matrixSize];
+        int[][] matrixC = new int[matrixSize][matrixSize];
         LinkedList<Future> taskFutures = new LinkedList<>();
-        for (int rowResult = 0; rowResult < matrixSize; rowResult++) {
-            final int finalRowResult = rowResult;
-            for (int columnResult = 0; columnResult < matrixSize; columnResult++) {
-                final int finalColumnResult = columnResult;
-                matrixC[finalRowResult][finalColumnResult] = 0;
-                taskFutures.add(executor.submit(() -> {
-                    for (int i = 0; i < matrixSize; i++) {
-                        matrixC[finalRowResult][finalColumnResult] +=
-                                matrixA[finalRowResult][i] * matrixB[i][finalColumnResult];
+        int[] thatColumn = new int[matrixSize];
+        taskFutures.add(executor.submit(() -> {
+            for (int j = 0; j < matrixSize; j++) {
+                for (int k = 0; k < matrixSize; k++) {
+                    thatColumn[k] = matrixB[k][j];
+                }
+                for (int i = 0; i < matrixSize; i++) {
+                    final int[] thisRow = matrixA[i];
+                    int sum = 0;
+                    for (int k = 0; k < matrixSize; k++) {
+                        sum += thisRow[k] * thatColumn[k];
                     }
-                }));
+                    matrixC[i][j] = sum;
+                }
             }
-        }
+        }));
+
         for (Future taskFuture : taskFutures) {
             taskFuture.get();
         }
-
         return matrixC;
     }
 
@@ -59,7 +62,8 @@ public class MatrixUtil {
                     matrixC[i][j] = sum;
                 }
             }
-        } catch (IndexOutOfBoundsException ignored) { }
+        } catch (IndexOutOfBoundsException ignored) {
+        }
 
         return matrixC;
     }
