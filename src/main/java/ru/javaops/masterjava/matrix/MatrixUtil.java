@@ -1,10 +1,8 @@
 package ru.javaops.masterjava.matrix;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.IntStream;
 
 /**
  * gkislin
@@ -84,7 +82,7 @@ public class MatrixUtil {
 
                     int sum = 0;
                     for (int k = 0; k < matrixSize; k++) {
-                       sum += matrixA[row][k] * matrixBTranspose[col][k];
+                        sum += matrixA[row][k] * matrixBTranspose[col][k];
                     }
                     matrixResult[row][col] = sum;
                 }
@@ -94,6 +92,53 @@ public class MatrixUtil {
         }
         executorService.invokeAll(threads);
         return matrixResult;
+    }
+
+    public static int[][] concurrentMultiply4(int[][] matrixA, int[][] matrixB, ExecutorService executorService) throws Exception {
+        final int matrixSize = matrixA.length;
+        final int[][] matrixC = new int[matrixSize][];
+
+        List<Callable<Void>> tasks = new ArrayList<>(matrixSize);
+        for (int j = 0; j < matrixSize; j++) {
+            final int row = j;
+            final int[] rowA = matrixA[row];
+            tasks.add(() -> {
+                final int[] rowC = new int[matrixSize];
+                for (int idx = 0; idx < matrixSize; idx++) {
+                    final int elA = rowA[idx];
+                    final int[] rowB = matrixB[idx];
+                    for (int col = 0; col < matrixSize; col++) {
+                        rowC[col] += elA * rowB[col];
+                    }
+                }
+                matrixC[row] = rowC;
+                return null;
+            });
+        }
+        executorService.invokeAll(tasks);
+        return matrixC;
+    }
+
+    public static int[][] concurrentMultiplyStreams(int[][] matrixA, int[][] matrixB) throws ExecutionException, InterruptedException {
+        final int matrixSize = matrixA.length;
+        final int[][] matrixC = new int[matrixSize][matrixSize];
+
+        new ForkJoinPool(Runtime.getRuntime().availableProcessors() - 1).submit(
+                () -> IntStream.range(0, matrixSize)
+                    .parallel()
+                    .forEach(row -> {
+                        final int[] rowA = matrixA[row];
+                        final int[] rowC = matrixC[row];
+
+                        for (int idx = 0; idx < matrixSize; idx++) {
+                            final int elA = rowA[idx];
+                            final int[] rowB = matrixB[idx];
+                            for (int col = 0; col < matrixSize; col++) {
+                                rowC[col] += elA * rowB[col];
+                            }
+                        }
+                    })).get();
+        return matrixC;
     }
 
 
@@ -162,6 +207,25 @@ public class MatrixUtil {
         } catch (IndexOutOfBoundsException ignored) {
         }
 
+        return matrixC;
+    }
+
+    public static int[][] singleThreadMultiply2(int[][] matrixA, int[][] matrixB) {
+        final int matrixSize = matrixA.length;
+        final int[][] matrixC = new int[matrixSize][matrixSize];
+
+        for (int row = 0; row < matrixSize; row++) {
+            final int[] rowA = matrixA[row];
+            final int[] rowC = matrixC[row];
+            for (int idx = 0; idx < matrixSize; idx++) {
+                final int elA = rowA[idx];
+                final int[] rowB = matrixB[idx];
+                for (int col = 0; col < matrixSize; col++) {
+                    rowC[col] += elA * rowB[col];
+                }
+            }
+            matrixC[row] = rowC;
+        }
         return matrixC;
     }
 
