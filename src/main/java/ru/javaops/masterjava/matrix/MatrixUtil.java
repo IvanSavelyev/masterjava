@@ -1,13 +1,10 @@
 package ru.javaops.masterjava.matrix;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.Set;
+import java.util.concurrent.*;
 
 /**
  * gkislin
@@ -15,55 +12,93 @@ import java.util.concurrent.Future;
  */
 public class MatrixUtil {
 
+    public static int[][] concurrentMultiply2(int[][] matrixA, int[][] matrixB, ExecutorService executorService) throws InterruptedException, ExecutionException {
+        final int matrixSize = matrixA.length;
+
+        class ColumnMultiplyResult {
+            private final int col;
+            private final int[] columnC;
+
+            public ColumnMultiplyResult(int col, int[] columnC) {
+                this.col = col;
+                this.columnC = columnC;
+            }
+        }
+
+        final CompletionService<ColumnMultiplyResult> completionService = new ExecutorCompletionService<>(executorService);
+
+        for (int j = 0; j < matrixSize; j++) {
+            final int col = j;
+            final int[] columnB = new int[matrixSize];
+            for (int k = 0; k < matrixSize; k++) {
+                columnB[k] = matrixB[k][col];
+            }
+            completionService.submit(() -> {
+                final int[] columnC = new int[matrixSize];
+
+                for (int row = 0; row < matrixSize; row++) {
+                    final int[] rowA = matrixA[row];
+                    int sum = 0;
+                    for (int k = 0; k < matrixSize; k++) {
+                        sum += rowA[k] * columnB[k];
+                    }
+                    columnC[row] = sum;
+                }
+                return new ColumnMultiplyResult(col, columnC);
+            });
+        }
+        final int[][] matrixC = new int[matrixSize][matrixSize];
+        for (int i = 0; i < matrixSize; i++) {
+            ColumnMultiplyResult result = completionService.take().get();
+            for (int k = 0; k < matrixSize; k++) {
+                matrixC[k][result.col] = result.columnC[k];
+            }
+        }
+        return matrixC;
+    }
+
+    public static int[][] concurrentMultiply3(int[][] matrixA, int[][] matrixB, ExecutorService executorService) throws InterruptedException {
+        final int matrixSize = matrixA.length;
+        final int[][] matrixResult = new int[matrixSize][matrixSize];
+        final int threadCount = Runtime.getRuntime().availableProcessors();
+        final int maxIndex = matrixSize * matrixSize;
+        final int cellsInThread = maxIndex / threadCount;
+        final int[][] matrixBTranspose = new int[matrixSize][matrixSize];
+
+        for (int i = 0; i < matrixSize; i++) {
+            for (int j = 0; j < matrixSize; j++) {
+                matrixBTranspose[i][j] = matrixB[j][i];
+            }
+        }
+
+        Set<Callable<Void>> threads = new HashSet<>();
+
+        int fromIndex = 0;
+        for (int i = 0; i < threadCount; i++) {
+            final int toIndex = i == threadCount ? maxIndex : fromIndex + cellsInThread;
+            final int firstIndexFinal = fromIndex;
+            threads.add(() -> {
+                for (int j = firstIndexFinal; j < toIndex; j++) {
+                    final int row = j / matrixSize;
+                    final int col = j % matrixSize;
+
+                    int sum = 0;
+                    for (int k = 0; k < matrixSize; k++) {
+                       sum += matrixA[row][k] * matrixBTranspose[col][k];
+                    }
+                    matrixResult[row][col] = sum;
+                }
+                return null;
+            });
+            fromIndex = toIndex;
+        }
+        executorService.invokeAll(threads);
+        return matrixResult;
+    }
+
+
     // TODO implement parallel multiplication matrixA*matrixB
     public static int[][] concurrentMultiply(int[][] matrixA, int[][] matrixB, int threadNumber) throws InterruptedException, ExecutionException {
-//        final int matrixSize = matrixA.length;
-//        int[][] matrixC = new int[matrixSize][matrixSize];
-//        LinkedList<Future<int[][]>> taskFutures = new LinkedList<>();
-//        ExecutorService executor = Executors.newFixedThreadPool(threadNumber);
-//
-//        int part = matrixSize / threadNumber;
-//        if (part < 1) {
-//            part = 1;
-//        }
-//        for (int j = 0; j < matrixSize; j += part) {
-//            final int finalJ = j;
-//            final int finalPart = part;
-//            int finalJ1 = j;
-//            taskFutures.add(executor.submit(() -> {
-//                for (int i = finalJ; i < finalJ + finalPart; i++) {
-//                    for (int k = 0; k < matrixSize; k++) {
-//                        for (int m = 0; m < matrixSize; m++) {
-//                            matrixC[i][finalJ1] = matrixA[i][k] * matrixB[k][m];
-//                        }
-//                    }
-//                }
-//                return matrixC;
-////                for (int k = 0; k < matrixSize; k++) {
-////                    thatColumn[k] = matrixB[k][finalJ];
-////                }
-////                for (int i = 0; i < matrixSize; i++) {
-////                    final int[] thisRow = matrixA[i];
-////                    int sum = 0;
-////                    for (int k = 0; k < matrixSize; k++) {
-////                        sum += thisRow[k] * thatColumn[k];
-////                    }
-////                    matrixC[i][finalJ] = sum;
-////                }
-//            }));
-//        }
-//        int[][] C = new int[matrixSize][matrixSize];
-//        int[][] CR;
-//        int start = 0;
-//        for (Future<int[][]> taskFuture : taskFutures) {
-//            CR = taskFuture.get();
-//            for (int i = start; i < part + start; i += 1) {
-//                C[i] = CR[i];
-//            }
-//            start += part;
-//        }
-//        executor.shutdown();
-//        return C;
         final int matrixSize = matrixA.length;
         int[][] C = new int[matrixSize][matrixSize];
         ExecutorService executor = Executors.newFixedThreadPool(threadNumber);

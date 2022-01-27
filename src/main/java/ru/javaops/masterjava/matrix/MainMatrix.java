@@ -10,7 +10,8 @@ import java.util.concurrent.Executors;
  */
 public class MainMatrix {
     private static final int MATRIX_SIZE = 1000;
-    private static final int THREAD_NUMBER = 50;
+    private static final int THREAD_NUMBER = 10;
+    private static final ExecutorService executor = Executors.newFixedThreadPool(THREAD_NUMBER);
 
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
@@ -19,7 +20,7 @@ public class MainMatrix {
         double singleThreadSum = 0.;
         double concurrentThreadSum = 0.;
         int count = 1;
-        while (count < 6) {
+        while (count < 20) {
             System.out.println("Pass " + count);
             long start = System.currentTimeMillis();
             final int[][] matrixC = MatrixUtil.singleThreadMultiply(matrixA, matrixB);
@@ -27,7 +28,7 @@ public class MainMatrix {
             out("Single thread time, sec: %.3f", duration);
             singleThreadSum += duration;
             start = System.currentTimeMillis();
-            final int[][] concurrentMatrixC = MatrixUtil.concurrentMultiply(matrixA, matrixB, THREAD_NUMBER);
+            final int[][] concurrentMatrixC = MatrixUtil.concurrentMultiply3(matrixA, matrixB, executor);
             duration = (System.currentTimeMillis() - start) / 1000.;
             out("Concurrent thread time, sec: %.3f", duration);
             concurrentThreadSum += duration;
