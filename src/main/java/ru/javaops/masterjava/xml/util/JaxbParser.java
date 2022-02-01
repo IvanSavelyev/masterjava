@@ -23,6 +23,7 @@ public class JaxbParser {
         }
     }
 
+    //    http://stackoverflow.com/questions/30643802/what-is-jaxbcontext-newinstancestring-contextpath
     public JaxbParser(String context) {
         try {
             init(JAXBContext.newInstance(context));
@@ -31,47 +32,49 @@ public class JaxbParser {
         }
     }
 
-    private void init(JAXBContext context) throws JAXBException {
-        jaxbMarshaller = new JaxbMarshaller(context);
-        jaxbUnmarshaller = new JaxbUnmarshaller(context);
+    private void init(JAXBContext ctx) throws JAXBException {
+        jaxbMarshaller = new JaxbMarshaller(ctx);
+        jaxbUnmarshaller = new JaxbUnmarshaller(ctx);
     }
 
-    public <T> T unmarshal(InputStream inputStream) throws JAXBException {
-        return (T) jaxbUnmarshaller.unmarshal(inputStream);
+    // Unmarshaller
+    public <T> T unmarshal(InputStream is) throws JAXBException {
+        return (T) jaxbUnmarshaller.unmarshal(is);
     }
 
     public <T> T unmarshal(Reader reader) throws JAXBException {
         return (T) jaxbUnmarshaller.unmarshal(reader);
     }
 
-    public <T> T unmarshal(String string) throws JAXBException {
-        return (T) jaxbUnmarshaller.unmarshal(string);
+    public <T> T unmarshal(String str) throws JAXBException {
+        return (T) jaxbUnmarshaller.unmarshal(str);
     }
 
-    public void setMarshallerProperty(String property, Object value) {
+    // Marshaller
+    public void setMarshallerProperty(String prop, Object value) {
         try {
-            jaxbMarshaller.setProperty(property, value);
+            jaxbMarshaller.setProperty(prop, value);
         } catch (PropertyException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
-    public synchronized String marshal(Object instance) throws JAXBException {
+    public String marshal(Object instance) throws JAXBException {
         return jaxbMarshaller.marshal(instance);
     }
 
-    public synchronized void marshal(Object instance, Writer writer) throws JAXBException {
+    public void marshal(Object instance, Writer writer) throws JAXBException {
         jaxbMarshaller.marshal(instance, writer);
     }
 
     public void setSchema(Schema schema) {
         this.schema = schema;
-        jaxbMarshaller.setSchema(schema);
         jaxbUnmarshaller.setSchema(schema);
+        jaxbMarshaller.setSchema(schema);
     }
 
-    public void validate(String string) throws IOException, SAXException {
-        validate(new StringReader(string));
+    public void validate(String str) throws IOException, SAXException {
+        validate(new StringReader(str));
     }
 
     public void validate(Reader reader) throws IOException, SAXException {
