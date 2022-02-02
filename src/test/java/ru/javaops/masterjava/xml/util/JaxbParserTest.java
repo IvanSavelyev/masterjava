@@ -38,5 +38,4 @@ class JaxbParserTest {
         JAXB_PARSER.validate(strCity);
         System.out.println(strCity);
     }
-
 }
