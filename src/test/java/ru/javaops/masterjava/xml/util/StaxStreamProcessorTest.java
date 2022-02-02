@@ -1,10 +1,9 @@
 package ru.javaops.masterjava.xml.util;
 
 import com.google.common.io.Resources;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.javaops.masterjava.xml.schema.CityType;
 
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.XMLEvent;
 
 class StaxStreamProcessorTest {
@@ -13,26 +12,18 @@ class StaxStreamProcessorTest {
     public void readCities() throws Exception {
         try (StaxStreamProcessor processor = new StaxStreamProcessor(
                 Resources.getResource(StaxStreamProcessor.class, "/payload.xml").openStream())) {
-            XMLStreamReader reader = processor.getReader();
-
-            while (reader.hasNext()) {
-                int event = reader.next();
-                if(event == XMLEvent.START_ELEMENT){
-                    if("City".equals(reader.getLocalName())){
-                        System.out.println(reader.getElementText());
-                    }
-                }
-            }
-
-
+            Assertions.assertTrue(processor.doUntil(XMLEvent.START_ELEMENT, "City"));
         }
-//        StaxStreamProcessor processor = new StaxStreamProcessor(
-//                Resources.getResource(StaxStreamProcessor.class, "/city.xml").openStream());
-//        Resources.getResource(StaxStreamProcessor.class, "/city.xml").openStream();
-//        try (StaxStreamProcessor processor = new StaxStreamProcessor(
-//                Resources.getResource(StaxStreamProcessorTest.class, "/city.xml")).getReader()) {
-//
-//        }
     }
 
+    @Test
+    public void readCities2() throws Exception {
+        try (StaxStreamProcessor processor = new StaxStreamProcessor(
+                Resources.getResource(StaxStreamProcessor.class, "/payload.xml").openStream())) {
+            String city;
+            while ((city = processor.getElementValue("City")) != null) {
+                System.out.println(city);
+            }
+        }
+    }
 }
