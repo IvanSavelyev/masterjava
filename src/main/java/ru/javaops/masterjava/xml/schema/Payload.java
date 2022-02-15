@@ -42,6 +42,17 @@ import javax.xml.bind.annotation.XmlType;
  *             &lt;/complexContent>
  *           &lt;/complexType>
  *         &lt;/element>
+ *         &lt;element name="Projects">
+ *           &lt;complexType>
+ *             &lt;complexContent>
+ *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *                 &lt;sequence maxOccurs="unbounded">
+ *                   &lt;element ref="{http://javaops.ru}Project"/>
+ *                 &lt;/sequence>
+ *               &lt;/restriction>
+ *             &lt;/complexContent>
+ *           &lt;/complexType>
+ *         &lt;/element>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -53,7 +64,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "users",
-    "cities"
+    "cities",
+    "projects"
 })
 @XmlRootElement(name = "Payload", namespace = "http://javaops.ru")
 public class Payload {
@@ -62,6 +74,8 @@ public class Payload {
     protected Payload.Users users;
     @XmlElement(name = "Cities", namespace = "http://javaops.ru", required = true)
     protected Payload.Cities cities;
+    @XmlElement(name = "Projects", namespace = "http://javaops.ru", required = true)
+    protected Payload.Projects projects;
 
     /**
      * Gets the value of the users property.
@@ -109,6 +123,30 @@ public class Payload {
      */
     public void setCities(Payload.Cities value) {
         this.cities = value;
+    }
+
+    /**
+     * Gets the value of the projects property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Payload.Projects }
+     *     
+     */
+    public Payload.Projects getProjects() {
+        return projects;
+    }
+
+    /**
+     * Sets the value of the projects property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Payload.Projects }
+     *     
+     */
+    public void setProjects(Payload.Projects value) {
+        this.projects = value;
     }
 
 
@@ -167,6 +205,66 @@ public class Payload {
                 city = new ArrayList<CityType>();
             }
             return this.city;
+        }
+
+    }
+
+
+    /**
+     * <p>Java class for anonymous complex type.
+     * 
+     * <p>The following schema fragment specifies the expected content contained within this class.
+     * 
+     * <pre>
+     * &lt;complexType>
+     *   &lt;complexContent>
+     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+     *       &lt;sequence maxOccurs="unbounded">
+     *         &lt;element ref="{http://javaops.ru}Project"/>
+     *       &lt;/sequence>
+     *     &lt;/restriction>
+     *   &lt;/complexContent>
+     * &lt;/complexType>
+     * </pre>
+     * 
+     * 
+     */
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "", propOrder = {
+        "project"
+    })
+    public static class Projects {
+
+        @XmlElement(name = "Project", namespace = "http://javaops.ru", required = true)
+        protected List<Project> project;
+
+        /**
+         * Gets the value of the project property.
+         * 
+         * <p>
+         * This accessor method returns a reference to the live list,
+         * not a snapshot. Therefore any modification you make to the
+         * returned list will be present inside the JAXB object.
+         * This is why there is not a <CODE>set</CODE> method for the project property.
+         * 
+         * <p>
+         * For example, to add a new item, do as follows:
+         * <pre>
+         *    getProject().add(newItem);
+         * </pre>
+         * 
+         * 
+         * <p>
+         * Objects of the following type(s) are allowed in the list
+         * {@link Project }
+         * 
+         * 
+         */
+        public List<Project> getProject() {
+            if (project == null) {
+                project = new ArrayList<Project>();
+            }
+            return this.project;
         }
 
     }
